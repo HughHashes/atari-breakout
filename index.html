@@ -1,0 +1,294 @@
+
+<html>
+<head>
+<title>Breakout</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<script type="text/javascript" src="https://static.codehs.com/gulp/71992e8724dc2df7aa888b4c75e8a628be08b73a/chs-js-lib/chs.js"></script>
+
+
+<style>
+canvas {
+    border: 1px solid black;
+    display: inline-block;
+    vertical-align: top;
+}
+
+pre {
+    border: 1px solid black;
+    display: inline-block;
+    width: 400px;
+    height: 500px;
+    background-color: #F5F5F5;
+}
+</style>
+
+</head>
+
+<body>
+<h1>Breakout</h1>
+
+
+
+<canvas
+width="400"
+height="500"
+class="codehs-editor-canvas"></canvas>
+<pre id="console"></pre>
+
+<script>
+window.onload = function() {
+
+    /* Constants for bricks */
+var NUM_ROWS = 8;
+var BRICK_TOP_OFFSET = 10;
+var BRICK_SPACING = 2;
+var NUM_BRICKS_PER_ROW = 10;
+var BRICK_HEIGHT = 10;
+var SPACE_FOR_BRICKS = getWidth() - (NUM_BRICKS_PER_ROW + 1) * BRICK_SPACING;
+var BRICK_WIDTH = SPACE_FOR_BRICKS / NUM_BRICKS_PER_ROW;
+var block;
+var block1;
+var y2;
+
+/* Constants for ball and paddle */
+var PADDLE_WIDTH = 80;
+var PADDLE_HEIGHT = 15;
+var PADDLE_OFFSET = 10;
+
+var BALL_RADIUS = 15;
+var ball;
+var paddle;
+var dx = 4;
+var dy = 4;
+var elem;
+var elem1;
+var elem2;
+var elem3;
+var elem4;
+var elem5;
+var elem6;
+var elem7;
+var blockRemove = 0;
+var loserCount = 0;
+var txt;
+var txt1;
+var winNum = 80;
+var speed = 20;
+
+
+function start(){
+	drawRow(1, 2, 1, Color.red);
+	drawRow(1, 28, 1, Color.orange);
+	drawRow(1, 54, 1, Color.green);
+	drawRow(1, 82, 1, Color.blue); 
+	
+	ball = new Circle(BALL_RADIUS);
+	ball.setPosition(getWidth() / 2, getHeight() / 2);
+	
+	paddle = new Rectangle(80, 15);
+	paddle.setPosition(10, getHeight() - 10);
+	add(paddle);
+    
+    mouseClickMethod(letsGo);
+    
+    mouseMoveMethod(paddler);
+    
+}
+
+//Starts game.
+function letsGo(e){
+    if(loserCount < 3){
+        //ball = new Circle(BALL_RADIUS);
+    	ball.setPosition(getWidth() / 2, getHeight() / 2);
+    	add(ball);
+        setTimer(draw, speed);
+        loserCount = loserCount + 1;
+        //speed *=speed;
+    }    
+    
+}
+
+//Makes the blocks/bricks.
+
+function drawRow(x, y, x2, color){
+    
+    for(var i = 0; i < 10; i++){
+        block = new Rectangle(BRICK_WIDTH, BRICK_HEIGHT);
+        block.setPosition(x,y);
+        block.setColor(color);
+        add(block);
+        x += 40;
+        block += 1;
+    }
+    y2 = y + 13;
+    for(var i = 0; i < 10; i++){
+        block1 = new Rectangle(BRICK_WIDTH, BRICK_HEIGHT);
+        block1.setPosition(x2,y2);
+        block1.setColor(color);
+        add(block1);
+        x2 += 40;
+        block1 + 1
+    }
+}
+
+//Makes the paddle follow the mouse.
+
+function paddler(e){
+    if(e.getX() > 0 && e.getX() < getWidth() - 80){
+        paddle.setPosition(e.getX(), getHeight() - 10);
+    }
+}
+
+//This is what makes the ball move and call the winner, checkWalls, and bounce functions.
+
+function draw(){
+    checkWalls();
+    bounce();
+    ball.move(dx, dy);
+    winner();
+}
+
+//it keeps count of how many blocks are left and if they are all gone it.
+
+function winner(){
+    if(blockRemove == winNum){
+        removeAll();
+        txt = new Text("You Win.!", "30pt Arial");
+        txt.setPosition(getWidth() / 12, getHeight() / 2);
+        txt.setColor(Color.red);
+        add(txt);
+    
+        txt1 = new Text("You are Master of All!", "30pt Arial");
+        txt1.setPosition(getWidth() / 15, getHeight() / 1.5);
+        txt1.setColor(Color.red);
+        add(txt1);
+        
+        stopTimer();
+        loserCount++;
+    }
+}
+
+//This makes the ball bounce off of different objects 
+
+function bounce(){    
+
+    
+    
+    var elemTop = getElementAt(ball.getX(), ball.getY() - (BALL_RADIUS)); 
+    var elemLeft = getElementAt(ball.getX() - (BALL_RADIUS), ball.getY()); 
+    var elemRight = getElementAt(ball.getX() + (BALL_RADIUS), ball.getY()); 
+    var elemBottom = getElementAt(ball.getX(), ball.getY() + (BALL_RADIUS));
+    elem6 = getElementAt(ball.getX() + (BALL_RADIUS), ball.getY() + 7.5);
+    elem1 = getElementAt(paddle.getX(), paddle.getY()- 15); 
+    elem2 = getElementAt(paddle.getX() + 81, paddle.getY() - 15);
+    elem3 = getElementAt(paddle.getX(), paddle.getY() - 15);
+    elem4 = getElementAt(paddle.getX() + 80, paddle.getY() - 15);
+    elem5 = getElementAt(paddle.getX() + 75, paddle.getY() - 15);
+    
+    if(elem6 == paddle){
+        dy = -dy;
+        dx = -dx;
+    }
+    if(elemBottom == paddle){
+        dy = -dy;
+    }
+    if(elemLeft == paddle){
+        dy = -dy;
+        dx =  -dx;
+    }
+    if(elemRight == paddle){
+        dy = -dy;
+        dx =  -dx;
+    }
+    if(elem1 == ball){
+        dy = -dy;
+        dx = -dx;
+    }
+    if(elem2 == ball){
+        dy = -dy;
+        dx =  -dx;
+    }
+    if(elem3 == ball){
+        dy = -dy;
+        dx =  -dx;
+    }
+    if(elem4 == ball){
+        dy = -dy;
+        dx =  -dx;
+    }
+    if(elem5 == ball){
+        dy = -dy;
+        dx = -dx;
+    }
+    
+    
+    
+    
+    if(elemTop != null && elemTop != ball && elemTop != paddle){ 
+        remove(elemTop); 
+        dy = -dy; 
+        blockRemove = blockRemove + 1; 
+    } 
+    if(elemLeft != null && elemLeft != ball && elemLeft != paddle){ 
+        remove(elemLeft); 
+        dx = -dx; 
+        blockRemove = blockRemove + 1; 
+    } 
+    if(elemRight != null && elemRight != ball && elemRight != paddle){ 
+        remove(elemRight); 
+        dx = -dx; 
+        blockRemove = blockRemove + 1; 
+    } 
+    if(elemBottom != null && elemBottom != ball && elemBottom != paddle){ 
+        remove(elemBottom); 
+        dy = -dy; 
+        blockRemove = blockRemove + 1; 
+    } 
+}
+function checkWalls(){
+	// Bounce off right wall
+	if(ball.getX() + ball.getRadius() > getWidth()){
+		dx = -dx;
+	}
+	
+	// Bounce off left wall
+	if(ball.getX() - ball.getRadius() < 0){
+		dx = -dx;
+	}
+	
+	// Bounce off bottom wall
+	if(ball.getY() + ball.getRadius() > getHeight()){
+		stopTimer(draw);
+		remove(ball);
+		if(loserCount == 3){
+            removeAll();
+            txt = new Text("You Lose! HAHAHA", "30pt Arial");
+            txt.setPosition(getWidth() / 12, getHeight() / 2);
+            txt.setColor(Color.red);
+            add(txt);
+            stopTimer(draw);
+            loserCount ++;
+        }
+	}
+	
+	
+	// Bounce off top wall
+	if(ball.getY() - ball.getRadius() < 0){
+		dy = -dy;
+	}
+
+}
+
+
+
+
+    if (typeof start === 'function') {
+        start();
+    }
+};
+</script>
+
+</body>
+</html>
